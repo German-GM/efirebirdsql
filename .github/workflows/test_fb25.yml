@@ -27,3 +27,11 @@ jobs:
         rebar3-version: '3'
     - name: Run tests
       run: rebar3 eunit
+    - name: Firebird container logs
+      if: always()
+      run: |
+        docker ps -a
+        for c in $(docker ps -aq); do
+          echo "== docker logs $c"; docker logs "$c" 2>&1 | tail -60
+          echo "== firebird.log $c"; docker exec "$c" sh -c 'cat /firebird/log/firebird.log 2>/dev/null || find / -name firebird.log -exec cat {} \; 2>/dev/null' || true
+        done
